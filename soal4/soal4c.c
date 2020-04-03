@@ -9,7 +9,7 @@ int main()
 {
 	int fd1[2];
 
-	pid_t p, child, child1;
+	pid_t child, child1;
 
 	if (pipe(fd1)==-1)
 	{
@@ -17,20 +17,20 @@ int main()
 		return 1;
 	}
 
-	p = fork();
+	child = fork();
 
-	if (p < 0)
+	if (child  < 0)
 	{
 		fprintf(stderr, "fork Failed" );
 		return 1;
 	}
 
-  if (p == 0){
+  if (child == 0){
     dup2(fd1[1], 1);
     close(fd1[0]);
     close(fd1[1]);
 
-    char *argv[] = {"ls", NULL};
+    char *argv[2] = {"ls", NULL};
     execv("/bin/ls", argv);
   }
 
@@ -39,7 +39,7 @@ int main()
     close(fd1[0]);
     close(fd1[1]);
 
-    char *argv[] = {"wc", "-l", NULL};
+    char *argv[3] = {"wc", "-l", NULL};
     execv("/usr/bin/wc", argv);
   }
 }

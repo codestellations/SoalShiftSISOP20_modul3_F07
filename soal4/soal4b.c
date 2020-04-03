@@ -5,21 +5,21 @@
 #include <pthread.h>
 
 int row = 0, col = 0;
-char fact[5][6];
+char fact[4][5];
 
-int (*hasil)[5][6];
+int (*hasil)[4][5];
 
 void *aritmatika(void *ptr){
   int n = *hasil[row][col];
-  int sn = (n / 2) * (1 + n);
+  int sn = (n * (1 + n))/2;
+
+  fact[row][col] = sn;
 
   if(col == 4){
-    printf("%d\n", sn);
     row++;
     col = 0;
   }
   else{
-    printf("%d\t", sn);
     col++;
   }
 }
@@ -40,7 +40,6 @@ int main(int argc, char const *argv[]) {
     }
     printf("\n");
   }
-  printf("\nSum result\n");
 
   pthread_t threads[20];
 
@@ -51,6 +50,15 @@ int main(int argc, char const *argv[]) {
 
   for(i=0; i<20; i++){
     pthread_join(threads[i], NULL);
+  }
+
+  printf("\nSum result\n");
+
+  for (i = 0; i < 4; i++) {
+    for (j = 0; j < 5; j++) {
+      printf("%d\t", fact[i][j]);
+    }
+    printf("\n");
   }
 
   shmdt(hasil);
