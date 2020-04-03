@@ -8,7 +8,8 @@
 #include <stdlib.h>
 #include <termios.h>
 
-int s_lul = 100, s_ball = 100, s_ber = 100;
+int (*item)[4], (*cur_pokemon)[2], *isRunning;
+
 int aktif = 0, pokeball = 9, pokedollar = 100, lul = 0, berry = 0,
     cur = 0;
 bool dapat = true, isPokedex = false, isShop = false,
@@ -17,6 +18,7 @@ bool dapat = true, isPokedex = false, isShop = false,
 pthread_t thread[20], thread_0;
 
 struct Pokemon{
+  int available = 1;
   char name[20];
   double escape;
   double encounter;
@@ -40,6 +42,13 @@ bool prob(double probability){
 //     - cari pokemon AKTIF > berhenti mencari
 //     - menemukan pokemon > masuk capture mode
 //     - boleh menambah menu go to capture mode
+
+void jenisPokemon(struct Pokemon pokemon[i]){
+  if (*cur_pokemon[0] == 1){
+    pokemon[]
+  }
+}
+
 void dapatPokemon(){
   char input_cari;
 
@@ -116,18 +125,11 @@ void pokedex(){
     pokemon[i].capture = 0.7;
     pokemon[i].gain_dollar = 80;
     pokemon[i].AP = 100;
-
-
-
-    // p_pokemon[i] = &pokemon[i];
-    // pokemon[i] = {(strcpy(pokemon[i].name, "bulbasaur"), 0.8, 0.5, 0.7, 80};
   }
 
   for(i = 0; i < 7; i++){
     printf("%d. nama  : %s\n", i+1, pokemon[i].name);
-    printf("   lain2 : %f %f %f\n", pokemon[i].encounter, pokemon[i].escape, pokemon[i].capture);
-    printf("   dollar  : %d\n", pokemon[i].gain_dollar);
-    printf("   AP  : %d %d\n", pokemon[i].AP), pokemon[i]->AP;
+    printf("   AP  : %d\n", pokemon[i].AP);
   }
 
   isPokedex = false;
@@ -143,7 +145,7 @@ void shop(){
   int inv = 99 - (lul + pokeball + berry);
 
   while(isShop){
-    printf("\nSHOP\n1. lullaby powder\n2. pokeball\n3. berry\n4. keluar");
+    printf("\nSHOP\n1. lullaby powder [%d]\n2. pokeball [%d]\n3. berry [%d]\n4. keluar", *item[1], *item[2], *item[3]);
     printf("\n--------\nyour inventory  : %d [lullaby %d] [pokeball %d] [berry %d]", inv, lul, pokeball, berry);
     printf("\nyour pokedollar : %d\n--------", pokedollar);
     printf("\nchoice : ");
@@ -161,6 +163,7 @@ void shop(){
             pokedollar -= jum*60;
             lul += jum;
             inv -= jum;
+            *item[1] -= jum;
             printf("lullaby powder dibeli.\n");
         }
 
@@ -183,6 +186,7 @@ void shop(){
           pokedollar -= jum*5;
           pokeball += jum;
           inv -= jum;
+          *item[2] -= jum;
           printf("pokeball dibeli.\n");
         }
 
@@ -205,6 +209,7 @@ void shop(){
           pokedollar -= jum*15;
           berry += jum;
           inv -= jum;
+          *item[3] -= jum;
           printf("berry dibeli.\n");
         }
 
@@ -348,28 +353,18 @@ void normal(){
   }
 }
 
-
 int main(int argc, char const *argv[]) {
-  int *hasil;
-
   key_t key = 1234;
   int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
-  hasil = shmat(shmid, NULL, 0);
+  item = shmat(shmid, NULL, 0);
+  cur_pokemon = shmat(shmid, NULL, 0);
+  isRunning = shmat(shmid, NULL, 0);
 
   normal();
 
-  // pthread_t thread[20];
-  //
-  // for (i=0; i<20; i++) {
-  //   int* p;
-  //   pthread_create(&threads[i], NULL, factorial, (void*)(p));
-  // }
-  //
-  // for(i=0; i<20; i++){
-  //   pthread_join(threads[i], NULL);
-  // }
-
-  shmdt(hasil);
+  shmdt(item);
+  shmdt(cur_pokemon);
+  shmdt(isRunning);
   shmctl(shmid, IPC_RMID, NULL);
 
   return 0;
