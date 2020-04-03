@@ -47,16 +47,13 @@ void *jualItem(void * ptr){
     for(i = 1; i < 4; i++){
       if(*item[i] <= MAX){
         *item[i] += 10;
-        printf("ditambah %d [%d]\n", i, *item[i]);
         if(*item[i] > MAX){
-          printf("dimaks %d\n", i);
           *item[i] = MAX;
         }
       }
     }
     sleep(10);
   }
-
 }
 
 // 3. random Pokemon

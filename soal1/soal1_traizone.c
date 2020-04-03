@@ -18,14 +18,14 @@ bool dapat = true, isPokedex = false, isShop = false,
 pthread_t thread[20], thread_0;
 
 struct Pokemon{
-  int available = 1;
+  bool available = 1;
   char name[20];
-  double escape;
   double encounter;
+  double escape;
   double capture;
   int gain_dollar;
   int AP;
-} pokemon[7], (*p_pokemon)[7];
+} pokemon[7];
 
 void normal();
 void capture();
@@ -36,6 +36,10 @@ bool prob(double probability){
   return rand() < probability * ((double)RAND_MAX + 1.0);
 }
 
+int randNum(int num){
+  return rand() % num;
+}
+
 // 1.a cari pokemon
 //     - aktif > tiap 10 detik ada 60% chance menemukan pokemon
 //       (encounter berdasarkan pokezone)
@@ -43,10 +47,53 @@ bool prob(double probability){
 //     - menemukan pokemon > masuk capture mode
 //     - boleh menambah menu go to capture mode
 
-void jenisPokemon(struct Pokemon pokemon[i]){
-  if (*cur_pokemon[0] == 1){
-    pokemon[]
+void jenisPokemon(){
+  int i;
+
+  char name_normal[5][15] =
+  {
+    "Bulbasaur", "Charmander", "Squirtle", "Rattata", "Caterpie"
+  };
+
+  char name_rare[5][15] =
+  {
+    "Pikachu", "Eevee", "Jigglypuff", "Snorlax", "Dragonite"
+  };
+
+  char name_legend[5][15] =
+  {
+    "Mew", "Mewtwo", "Moltres", "Zapdos", "Articuno"
+  };
+
+  for(i = 0; i<7; i++){
+    if(pokemon[i].available){
+      int r = randNum(5);
+      if (*cur_pokemon[0] == 3){
+        strcpy(pokemon[i].name, name_legend[r]);
+        pokemon[i].encounter = 0.05;
+        pokemon[i].escape = 0.2;
+        pokemon[i].capture = 0.3;
+        pokemon[i].gain_dollar = 200;
+      }
+      else if(*cur_pokemon[0] == 2){
+        strcpy(pokemon[i].name, name_rare[r]);
+        pokemon[i].encounter = 0.15;
+        pokemon[i].escape = 0.1;
+        pokemon[i].capture = 0.5;
+        pokemon[i].gain_dollar = 100;
+      }
+      else{
+        strcpy(pokemon[i].name, name_normal[r]);
+        pokemon[i].encounter = 0.8;
+        pokemon[i].escape = 0.05;
+        pokemon[i].capture = 0.7;
+        pokemon[i].gain_dollar = 80;
+      }
+      pokemon[i].available = false;
+    }
   }
+  // no slot available
+  printf("no slot available. \n");
 }
 
 void dapatPokemon(){
@@ -245,6 +292,8 @@ void shop(){
 // *** pokemon memiliki peluang untuk lari berdasarkan tabel
 void capture(){
   char input_capture[20];
+
+  jenisPokemon();
 
   while(isCapturing){
     printf("\nCATCH the pokemon!\n1. tangkap\n2. item\n3. keluar\nchoice : ");
