@@ -58,6 +58,12 @@ int main(int argc, char const *argv[]) {
     printf("\n");
   }
 
+  for (i = 0; i < 4; i++) {
+    for (j = 0; j < 5; j++) {
+      *hasil[i][j] = 0;
+    }
+  }
+
   pthread_t threads[4];
 
   for (i=0; i<4; i++) {
