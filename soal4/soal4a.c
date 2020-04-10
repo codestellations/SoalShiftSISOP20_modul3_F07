@@ -29,9 +29,6 @@ void* multip(void* arg){
       *hasil[step][i] += m1[step][j] * m2[j][i];
     }
   }
-
-  printf("ini terakhir %d\n", *hasil[step][i]);
-
   step++;
 }
 
