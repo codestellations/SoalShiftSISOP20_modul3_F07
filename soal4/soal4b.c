@@ -7,7 +7,7 @@
 int row = 0, col = 0;
 char fact[4][5];
 
-int (*hasil)[4][5];
+int (*hasil)[5][6];
 
 void *aritmatika(void *ptr){
   int n = *hasil[row][col];
