@@ -28,8 +28,8 @@ void shutdown(){
 
   else{
     while((wait(&status)) > 0);
-    char *argv[] = {"killall", "1b", NULL};
-    execv("/usr/bin/killall", argv);
+    // char *argv[] = {"killall", "1b", NULL};
+    // execv("/usr/bin/killall", argv);
   }
 }
 
@@ -43,7 +43,7 @@ void *jualItem(void * ptr){
 
   sleep(10);
 
-  while(*item[0] <= MAX || *item[1] <= MAX || *item[3] <= MAX){
+  while(*item[1] <= MAX || *item[2] <= MAX || *item[3] <= MAX){
     for(i = 1; i < 4; i++){
       if(*item[i] <= MAX){
         *item[i] += 10;
@@ -73,25 +73,25 @@ void *randomPokemon(void *ptr){
 
     if(random > normal){
       if(random > rare){
-        printf("legendary Pokemon\n");
-        fflush(stdout);
+        // printf("legendary Pokemon\n");
+        // fflush(stdout);
         *cur_pokemon[0] = 3;
       }
       else{
-        printf("rare Pokemon\n");
-        fflush(stdout);
+        // printf("rare Pokemon\n");
+        // fflush(stdout);
         *cur_pokemon[0] = 2;
       }
     }
     else{
-      printf("normal Pokemon\n");
-      fflush(stdout);
+      // printf("normal Pokemon\n");
+      // fflush(stdout);
       *cur_pokemon[0] = 1;
     }
 
     if((rand() < prob(0.000125))){
-      printf("shiny pokemon\n");
-      fflush(stdout);
+      // printf("shiny pokemon\n");
+      // fflush(stdout);
       *cur_pokemon[1] = 1;
     }
     else{
@@ -129,11 +129,12 @@ int main(int argc, char const *argv[]) {
   while (running) {
     int input;
 
-    printf("%d %d %d\n", *item[0], *item[1], *item[2]);
+    printf("ketik 1 untuk shutdown kedua program\n");
 
     scanf("%d", &input);
 
     if(input == 1){
+      shutdown();
       running = 0;
     }
   }

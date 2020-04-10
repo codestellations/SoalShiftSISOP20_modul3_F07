@@ -12,25 +12,32 @@ int (*item)[4], (*cur_pokemon)[2], *isRunning;
 
 int aktif = 0, pokeball = 9, pokedollar = 100, lul = 0, berry = 0,
     cur = 0;
-bool dapat = true, isPokedex = false, isShop = false,
+bool dapat = false, isPokedex = false, isShop = false,
      isCapturing = false, isAPDecreasing = true;
 
-pthread_t thread[20], thread_0;
+pthread_t thread[20], thread_0, thread_2;
 
 struct Pokemon{
-  bool available = 1;
+  bool available;
   char name[20];
   double encounter;
   double escape;
   double capture;
   int gain_dollar;
   int AP;
-} pokemon[7];
+} pokemon[7], tempPokemon;
+
+struct Pokemon *(pokeAP[7]);
 
 void normal();
 void capture();
 void pokedex();
 void shop();
+void jenisPokemon();
+void *cariPokemon();
+void *decreaseAP();
+void *escapePokemon();
+void *lullabyPowder();
 
 bool prob(double probability){
   return rand() < probability * ((double)RAND_MAX + 1.0);
@@ -46,10 +53,7 @@ int randNum(int num){
 //     - cari pokemon AKTIF > berhenti mencari
 //     - menemukan pokemon > masuk capture mode
 //     - boleh menambah menu go to capture mode
-
 void jenisPokemon(){
-  int i;
-
   char name_normal[5][15] =
   {
     "Bulbasaur", "Charmander", "Squirtle", "Rattata", "Caterpie"
@@ -65,73 +69,47 @@ void jenisPokemon(){
     "Mew", "Mewtwo", "Moltres", "Zapdos", "Articuno"
   };
 
-  for(i = 0; i<7; i++){
-    if(pokemon[i].available){
-      int r = randNum(5);
-      if (*cur_pokemon[0] == 3){
-        strcpy(pokemon[i].name, name_legend[r]);
-        pokemon[i].encounter = 0.05;
-        pokemon[i].escape = 0.2;
-        pokemon[i].capture = 0.3;
-        pokemon[i].gain_dollar = 200;
-      }
-      else if(*cur_pokemon[0] == 2){
-        strcpy(pokemon[i].name, name_rare[r]);
-        pokemon[i].encounter = 0.15;
-        pokemon[i].escape = 0.1;
-        pokemon[i].capture = 0.5;
-        pokemon[i].gain_dollar = 100;
-      }
-      else{
-        strcpy(pokemon[i].name, name_normal[r]);
-        pokemon[i].encounter = 0.8;
-        pokemon[i].escape = 0.05;
-        pokemon[i].capture = 0.7;
-        pokemon[i].gain_dollar = 80;
-      }
-      pokemon[i].available = false;
-    }
+  int r = randNum(5);
+  if (*cur_pokemon[0] == 3){
+    strcpy(tempPokemon.name, name_legend[r]);
+    tempPokemon.encounter = 0.05;
+    tempPokemon.escape = 0.2;
+    tempPokemon.capture = 0.3;
+    tempPokemon.gain_dollar = 200;
   }
-  // no slot available
-  printf("no slot available. \n");
-}
-
-void dapatPokemon(){
-  char input_cari;
-
-  dapat = true;
-
-  printf("\nMove to capture scene? y/n\n\nchoice : ");
-  scanf("%c", &input_cari);
-  getchar();
-
-  if(input_cari == 'y'){
-    aktif = 0;
-    printf("memindahkan ke CAPTURE ...\n");
-    sleep(1);
-    isCapturing = true;
-    capture(pokeball);
-  }
-  else if (input_cari == 'n'){
-    printf("mengembalikan ke MENU ...\n");
-    sleep(1);
+  else if(*cur_pokemon[0] == 2){
+    strcpy(tempPokemon.name, name_rare[r]);
+    tempPokemon.encounter = 0.15;
+    tempPokemon.escape = 0.1;
+    tempPokemon.capture = 0.5;
+    tempPokemon.gain_dollar = 100;
   }
   else{
-    printf("perintah invalid. mengembalikan ke MENU ...\n");
-    sleep(1);
+    strcpy(tempPokemon.name, name_normal[r]);
+    tempPokemon.encounter = 0.8;
+    tempPokemon.escape = 0.05;
+    tempPokemon.capture = 0.7;
+    tempPokemon.gain_dollar = 80;
   }
+  tempPokemon.available = false;
+  tempPokemon.AP = 100;
 
-  dapat = false;
+  if(*cur_pokemon[1] == 1){
+    strcat("shining", tempPokemon.name);
+    tempPokemon.escape += 0.05;
+    tempPokemon.capture -= 0.2;
+    tempPokemon.gain_dollar += 5000;
+  }
 }
 
 void *cariPokemon(void *ptr){
   thread_0 = pthread_self();
   while(aktif){
-    sleep(5);
+    sleep(10);
     if(prob(0.6)){
       printf("\n\nPokemon found!\n\nchoice : ");
       fflush(stdout);
-      dapat = 1;
+      dapat = true;
       aktif = 0;
     }
     else{
@@ -141,15 +119,53 @@ void *cariPokemon(void *ptr){
   }
 }
 
-// void *decreaseAP(void *ptr){
-//   int ap = 100;
-//
-//   while(pokemon[cur].AP <= 100 && isCapturing==false){
-//
-//     sleep(10);
-//     ap -= 10;
-//   }
-// }
+void *decreaseAP(void *pokeAP){
+  while(((struct Pokemon*)pokeAP)->available == false){
+    while(((struct Pokemon*)pokeAP)->AP <= 100 && isCapturing==false){
+      sleep(10);
+      ((struct Pokemon*)pokeAP)->AP -= 10;
+
+      if(((struct Pokemon*)pokeAP)->AP == 0){
+        if (prob(0.9)){
+          printf("pokemon %s melepaskan diri karena kurang perhatian.\n", ((struct Pokemon*)pokeAP)->name);
+          ((struct Pokemon*)pokeAP)->available = true;
+          break;
+        }
+        else{
+          printf("pokemon %s reset AP menjadi 50.\n", ((struct Pokemon*)pokeAP)->name);
+          ((struct Pokemon*)pokeAP)->AP = 50;
+        }
+      }
+
+    }
+  }
+}
+
+void *escapePokemon(void *ptr){
+  thread_2 = pthread_self();
+
+  while(isCapturing){
+    sleep(20);
+    if(prob(tempPokemon.escape)){
+      printf("pokemon melarikan diri!\n");
+      printf("mengembalikan ke MENU ...\n");
+      isCapturing = false;
+      sleep(1);
+      break;
+    }
+  }
+}
+
+void *lullabyPowder(void *ptr){
+  double tempEscape = tempPokemon.escape;
+  tempPokemon.escape = 0.0;
+  tempPokemon.capture += 0.2;
+
+  sleep(10);
+
+  tempPokemon.escape = tempEscape;
+  tempPokemon.capture -= 0.2;
+}
 
 // 1.b pokedex
 //     - list pokemon + affection point
@@ -161,25 +177,91 @@ void *cariPokemon(void *ptr){
 //     - bisa melepas dan dapat duit sesuai tabel
 //     - bisa beri berry ke semua, +10 AP ke semua, -1 berry
 void pokedex(){
-  int i;
+  int i, lepas, ada;
+  char input_poke[20];
 
-  printf("\nPOKEDEX\n");
+  while(isPokedex){
+    ada = 0;
+    printf("\nPOKEDEX\n1. lihat pokemon\n2. lepas pokemon\n3. beri berry\n4. keluar");
+    printf("\nchoice : ");
 
-  for(i = 0; i < 7; i++){
-    strcpy(pokemon[i].name, "bulbasaur");
-    pokemon[i].encounter = 0.8;
-    pokemon[i].escape = 0.5;
-    pokemon[i].capture = 0.7;
-    pokemon[i].gain_dollar = 80;
-    pokemon[i].AP = 100;
+    fgets(input_poke, 20, stdin);
+    input_poke[strlen(input_poke)-1] = '\0';
+
+    if(strcmp("lihat pokemon", input_poke)==0 || strcmp("1", input_poke)==0){
+      for(i = 0; i < 7; i++){
+        if(pokemon[i].available == false){
+          printf("%d. nama  : %s\n", i+1, pokemon[i].name);
+          printf("   AP   : %d\n", pokemon[i].AP);
+          ada = 1;
+        }
+
+        if(!ada){
+          printf("tidak ada pokemon.\n");
+        }
+      }
+    }
+
+    else if(strcmp("lepas pokemon", input_poke)==0 || strcmp("2", input_poke)==0){
+      for(i = 0; i < 7 ; i++){
+        if(!pokemon[i].available){
+          printf("slot %d : %s\n", i+1, pokemon[i].name);
+          ada = 1;
+        }
+      }
+
+      if(ada){
+        printf("pokemon mana yang akan dilepas : ");
+        scanf("%d", &lepas);
+        getchar();
+        if(!pokemon[lepas-1].available && lepas>0){
+          pokemon[lepas-1].available = true;
+          pokedollar += pokemon[lepas-1].gain_dollar;
+          printf("pokemon %s berhasil dilepas dan mendapat %d dollar.\n", pokemon[lepas-1].name, pokemon[lepas-1].gain_dollar);
+        }
+        else{
+          printf("pilihan invalid.\n");
+        }
+      }
+      else{
+        printf("tidak ada pokemon yang bisa dilepas\n");
+      }
+
+    }
+
+    else if(strcmp("beri berry", input_poke)==0 || strcmp("3", input_poke)==0){
+      if(berry>0){
+        for(i = 0; i < 7; i++){
+          if(pokemon[i].available){
+            pokemon[i].AP += 10;
+            ada = 1;
+          }
+        }
+        if(ada){
+          berry--;
+          printf("berry telah diberikan.\n");
+        }
+        else{
+          printf("tidak ada pokemon untuk diberi berry.\n");
+        }
+      }
+      else{
+        printf("berry tidak mencukupi.\n");
+      }
+
+    }
+
+    else if(strcmp("keluar", input_poke)==0 || strcmp("4", input_poke)==0){
+      printf("\nmengembalikan ke MENU ...\n");
+      isPokedex = false;
+      sleep(1);
+      break;
+    }
+
+    else{
+      printf("pilihan invalid\n");
+    }
   }
-
-  for(i = 0; i < 7; i++){
-    printf("%d. nama  : %s\n", i+1, pokemon[i].name);
-    printf("   AP  : %d\n", pokemon[i].AP);
-  }
-
-  isPokedex = false;
 }
 
 // 1.c shop
@@ -266,7 +348,6 @@ void shop(){
       else{
         printf("jumlah melebihi batas\n");
       }
-
     }
 
     else if(strcmp("keluar", input_shop)==0 || strcmp("4", input_shop)==0){
@@ -291,9 +372,16 @@ void shop(){
 // 2.c keluar >> kembali ke normal mode
 // *** pokemon memiliki peluang untuk lari berdasarkan tabel
 void capture(){
+  int i;
   char input_capture[20];
 
+  dapat = false;
+
   jenisPokemon();
+
+  if(pthread_create(&thread[2], NULL, escapePokemon, NULL)){
+    printf("thread 3 failed\n");
+  }
 
   while(isCapturing){
     printf("\nCATCH the pokemon!\n1. tangkap\n2. item\n3. keluar\nchoice : ");
@@ -302,20 +390,66 @@ void capture(){
     input_capture[strlen(input_capture)-1] = '\0';
 
     if(strcmp("tangkap", input_capture)==0 || strcmp("1", input_capture)==0){
-      printf("ini nangkep\n");
       if(pokeball>0){
         pokeball--;
+
+        sleep(1);
+
+        if(prob(tempPokemon.capture)){
+          printf("pokemon %s berhasil ditangkap!\n", tempPokemon.name);
+
+          sleep(1);
+
+          for(i = 0; i < 7 ; i++){
+            if(pokemon[i].available){
+              pokemon[i] = tempPokemon;
+              printf("%s berhasil disimpan di pokedex.\n", tempPokemon.name);
+
+              if(pthread_create(&thread[i+4], NULL, decreaseAP, pokeAP[i])){
+                printf("thread %d failed\n", i+4);
+              }
+
+              break;
+            }
+          }
+
+          if(i == 7){
+            printf("slot pokemon penuh.\n");
+            printf("pokemon dilepas dan mendapat %d pokedollar.\n", tempPokemon.gain_dollar);
+          }
+        }
+        else{
+          printf("pokemon tidak berhasil ditangkap.\n");
+        }
       }
       else
       printf("pokeball habis.\n");
+
+      pthread_cancel(thread_2);
+
+      printf("\nmengembalikan ke MENU ...\n");
+      isCapturing = false;
+      sleep(1);
+      break;
     }
 
     else if(strcmp("item", input_capture)==0 || strcmp("2", input_capture)==0){
-      printf("ini item\n");
+      if(lul>0){
+        if(pthread_create(&thread[3], NULL, lullabyPowder, NULL)){
+          printf("thread 4 failed\n");
+        }
+
+        printf("menggunakan lullaby powder untuk %s.\n", tempPokemon.name);
+      }
+      else{
+        printf("lullaby powder tidak mencukupi.\n");
+      }
+
     }
 
     else if(strcmp("keluar", input_capture)==0 || strcmp("3", input_capture)==0){
-      printf("mengembalikan ke MENU ...\n");
+      pthread_cancel(thread_2);
+      printf("\nmengembalikan ke MENU ...\n");
       isCapturing = false;
       sleep(1);
       break;
@@ -337,77 +471,79 @@ void normal(){
 
   printf("WELCOME TO POKE*ZONE!!!!\n-------------------------\n");
   while(!(isCapturing && isShop && isPokedex)){
-    // if(dapat){
-    //   dapatPokemon();
-    // }
-    // else{
-      if(!aktif){
-        strcpy(choice, choice1);
+    if(!aktif){
+      strcpy(choice, choice1);
+    }
+    else{
+      strcpy(choice, choice2);
+    }
+
+    printf("MENU\n1. %s\n2. pokedex\n3. shop\n4. go to capture\n5. exit\nchoice : ", choice);
+
+    fgets(input_normal, 20, stdin);
+    input_normal[strlen(input_normal)-1] = '\0';
+
+    if(strcmp(choice, input_normal)==0 || strcmp("1", input_normal)==0){
+      if(pthread_create(&thread[0], NULL, cariPokemon, NULL)){
+        printf("thread 1 failed\n");
+      }
+
+      if(aktif){
+        pthread_cancel(thread_0);
+        aktif = 0;
       }
       else{
-        strcpy(choice, choice2);
+        aktif = 1;
       }
+    }
 
-      printf("MENU\n1. %s\n2. pokedex\n3. shop\n4. go to capture\n5. exit\nchoice : ", choice);
+    else if(strcmp("pokedex", input_normal)==0 || strcmp("2", input_normal)==0){
+      isPokedex = true;
+      pokedex();
+    }
 
-      fgets(input_normal, 20, stdin);
-      input_normal[strlen(input_normal)-1] = '\0';
+    else if(strcmp("shop", input_normal)==0 || strcmp("3", input_normal)==0){
+      isShop = true;
+      shop();
+    }
 
-      if(strcmp(choice, input_normal)==0 || strcmp("1", input_normal)==0){
-        printf("ini pilihan 1\n");
-
-        if(pthread_create(&thread[0], NULL, cariPokemon, NULL)){
-          printf("thread 1 failed\n");
-        }
-
-        if(aktif){
-          pthread_cancel(thread_0);
-          aktif = 0;
-        }
-        else{
-          aktif = 1;
-        }
+    else if(strcmp("go to capture", input_normal)==0 || strcmp("4", input_normal)==0){
+      if(dapat){
+        aktif = 0;
+        printf("\nmemindahkan ke CAPTURE ...\n");
+        sleep(1);
+        isCapturing = true;
+        capture();
       }
-
-      else if(strcmp("pokedex", input_normal)==0 || strcmp("2", input_normal)==0){
-        // printf("ini pilihan 2\n");
-        isPokedex = true;
-        pokedex();
-      }
-
-      else if(strcmp("shop", input_normal)==0 || strcmp("3", input_normal)==0){
-        isShop = true;
-        shop();
-      }
-
-      else if(strcmp("go to capture", input_normal)==0 || strcmp("4", input_normal)==0){
-        if(dapat){
-          dapatPokemon();
-        }
-        else{
-          printf("pokemon belum ditemukan\n");
-        }
-      }
-
-      else if(strcmp("exit", input_normal)==0 || strcmp("5", input_normal)==0)
-      break;
-
       else{
-        printf("pilihan invalid\n");
+        printf("pokemon belum ditemukan\n");
       }
+    }
 
-      printf("\n");
-    // }
+    else if(strcmp("exit", input_normal)==0 || strcmp("5", input_normal)==0)
+    break;
 
+    else{
+      printf("pilihan invalid\n");
+    }
+
+    printf("\n");
   }
 }
 
 int main(int argc, char const *argv[]) {
+  int i;
   key_t key = 1234;
   int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
   item = shmat(shmid, NULL, 0);
   cur_pokemon = shmat(shmid, NULL, 0);
   isRunning = shmat(shmid, NULL, 0);
+
+  for(i = 0; i < 7; i++){
+    pokemon[i].available = true;
+    pokeAP[i] = (struct Pokemon *)malloc(sizeof(struct Pokemon));
+    pokeAP[i] = &pokemon[i];
+  }
 
   normal();
 
