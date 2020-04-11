@@ -514,6 +514,67 @@ untuk mempassing pokemon jenis apa yang digenerate, digunakan shared memory seba
 thread melakukan kalkulasi ini setiap 1 detik, dengan implementasi pada `sleep(1)`.
 
 ---
+## Soal 3
+Buatlah sebuah program dari C untuk mengkategorikan file. 
+Program ini akan memindahkan file sesuai ekstensinya (tidak case sensitive. JPG dan jpg adalah sama) ke dalam folder 
+sesuai ekstensinya yang folder hasilnya terdapat di working directory ketika program kategori tersebut dijalankan.
+
+### Mengecek apakah path yang dituju merupakan suatu direktori atau bukan
+~~~
+int is_directory(const char* path)
+{
+    struct stat path_stat; 
+    stat(path, &path_stat); 
+    return S_ISDIR(path_stat.st_mode);
+}
+~~~
+- `struct stat path_stat;` struct stat digunakan untuk menyimpan informasi tentang files
+- `stat(path, &path_stat); ` fungsi stat digunakan untuk membuat list properti yang diidentifikasi oleh path
+- `return S_ISDIR(path_stat.st_mode);` akan memberikan return non-zero jika merupakan sebuah direktori
+
+### Mengambil string nama dari direktori dengan delimiter "/" dan "."
+~~~
+strcpy(copy, arg);
+slash = strtok(copy, "/");
+while(slash != NULL)
+{
+  arrs[x] = slash;
+  x++;
+  slash = strtok(NULL, "/");
+}
+strcpy(temp, arrs[x - 1]);
+dot = strtok(temp, ".");
+while(dot != NULL)
+{
+   arrd[y] = dot;
+   y++;
+    dot = strtok(NULL, ".");
+}
+~~~
+- `strcpy(copy, arg);` mengopi arg ke string copy
+- `slash = strtok(copy, "/");` digunakan untuk mengambil string dengan delimiter "/"  dan 
+  `strcpy(copy, arg);` digunakan untuk mengambil string dengan delimiter "."
+  
+### Perintah "-f"
+Pada perintah "-f" file yang dipindahkan berjumlah sebanyak argumen yang diinputkan.
+<img width="990" alt="Screen Shot 2020-04-11 at 19 17 10" src="https://user-images.githubusercontent.com/58472359/79043909-70237a80-7c2c-11ea-99bb-87aaf1b79ab1.png">
+<img width="891" alt="Screen Shot 2020-04-11 at 19 45 18" src="https://user-images.githubusercontent.com/58472359/79044046-2dae6d80-7c2d-11ea-9242-665e3f725835.png">
+<img width="891" alt="Screen Shot 2020-04-11 at 19 46 13" src="https://user-images.githubusercontent.com/58472359/79044083-5df60c00-7c2d-11ea-81aa-30d87043fe2e.png">
+<img width="891" alt="Screen Shot 2020-04-11 at 19 46 36" src="https://user-images.githubusercontent.com/58472359/79044088-63ebed00-7c2d-11ea-852c-d55bb573f2a5.png">
+
+### Perintah "-d"
+Pada perintah "-d" file yang dipindahkan merupakan keseluruhan dalam suatu folder yang dipilih dan direktorinya menjadi 
+`folder/direktoribaru`
+<img width="990" alt="Screen Shot 2020-04-11 at 19 19 51" src="https://user-images.githubusercontent.com/58472359/79044114-7fef8e80-7c2d-11ea-8305-b7b27623df8b.png">
+<img width="990" alt="Screen Shot 2020-04-11 at 19 20 00" src="https://user-images.githubusercontent.com/58472359/79044121-867e0600-7c2d-11ea-8a85-7ca24880b929.png">
+
+### Perintah "*"
+Pada perintah "*" file yang dipindahkan merupakan seluruh file yang berada dalam satu folder dengan program soal3.c 
+yang sedang dijalankan
+<img width="992" alt="Screen Shot 2020-04-10 at 21 55 44" src="https://user-images.githubusercontent.com/58472359/79044140-b4634a80-7c2d-11ea-8638-bbe76917e08d.png">
+<img width="891" alt="Screen Shot 2020-04-11 at 19 48 33" src="https://user-images.githubusercontent.com/58472359/79044144-b75e3b00-7c2d-11ea-9120-9f47624fe2f9.png">
+
+---
 
 # Soal 4
 ## a. Perkalian matriks
