@@ -25,7 +25,7 @@ char cwd[1024] = {0};
 int is_directory(const char* path) /*mengecek apakah suatu direktori atau bukan*/
 {
     struct stat path_stat; /*struct stat menyimpan informasi tentang files*/
-    stat(path, &path_stat); /*untuk membuat list properti yg diidentifikasi stat*/
+    stat(path, &path_stat); /*untuk membuat list properti yg diidentifikasi path*/
     return S_ISDIR(path_stat.st_mode); /*return non-zero jika file merupakan direktori*/
 }
 
