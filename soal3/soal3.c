@@ -18,14 +18,15 @@
 #include <limits.h>
 #include <dirent.h>
 
-pthread_t tid[1000];
+pthread_t tid[1000]; /*menginisiasi banyak maksimal thread*/
+pid_t child_id;
 char cwd[1024] = {0};
 
-int is_directory(const char* path) /*mengecek apakah direktori atau bukan*/
+int is_directory(const char* path) /*mengecek apakah suatu direktori atau bukan*/
 {
-    struct stat path_stat;
-    stat(path, &path_stat);
-    return S_ISDIR(path_stat.st_mode);
+    struct stat path_stat; /*struct stat menyimpan informasi tentang files*/
+    stat(path, &path_stat); /*untuk membuat list properti yg diidentifikasi stat*/
+    return S_ISDIR(path_stat.st_mode); /*return non-zero jika file merupakan direktori*/
 }
 
 void *count(void *arg)
@@ -43,9 +44,9 @@ void *count(void *arg)
         memset(extension, 0, 100);
         memset(temp, 0, 100);
 
-        strcpy(copy, arg);
-        slash = strtok(copy, "/");
-        while(slash != NULL) 
+        strcpy(copy, arg); /*mengopi string ke variabel copy*/
+        slash = strtok(copy, "/"); /*split string dengan delimiter / */
+        while(slash != NULL)
         {
             arrs[x] = slash;
             x++;
@@ -61,20 +62,9 @@ void *count(void *arg)
             dot = strtok(NULL, ".");
         }
 
-        printf("%d", y);
-        // strcpy(extension, arrd[y - 1]);
-        // if((dot[strlen(dot-1)] >= 'a' && dot[strlen(dot)-1] <= 'z') || ((dot[strlen(dot)-1] >= 'A' && dot[strlen(dot)-1] <= 'Z')))
-        // {
-        //    // strcpy(extension, dot);
-        //    // strcpy(extension, arrd[y - 1]);
-        //     for(int i = 0; extension[i]; i++)
-        //     {
-        //         extension[i] = tolower(extension[i]);
-        //     }   
-        // }
-
         strcpy(extension, arrd[y-1]);
-        for(int i=0 ; i<strlen(extension) ;i++){
+        for(int i=0 ; i < strlen(extension);i++)
+        {
             extension[i] = tolower(extension[i]);
         }
 
@@ -99,9 +89,8 @@ void *count(void *arg)
         int ch;
         FILE *pf1, *pf2;
         pf1 = fopen(arg, "r");
-
         
-        strcat(temp1, "/");       
+        strcat(temp1, "/");
         strcat(strcat(strcat(temp1, arrd[y-2]), "."), extension);
 
         pf2 = fopen(temp1, "w");
@@ -117,15 +106,11 @@ void *count(void *arg)
 
 int main(int argc, char const *argv[])
 {
-    int loop = 0;
+    int loop = 0, i = 0;
     if(strcmp(argv[1], "-f") == 0)
     {
-        for(int i=2; i<argc; i++)
-        {
+        for(i=2; i<argc; i++){
             pthread_create(&(tid[i]), NULL, count, (void *)argv[i]);
-        }
-        for(int i=2; i<argc ;i++)
-        {
             pthread_join(tid[i], NULL);
         }
     }
@@ -182,9 +167,9 @@ int main(int argc, char const *argv[])
                 strcat(a, "..");
                 strcpy(b, cwd);
                 strcat(b, ".");
-                if(strcmp(temp,a)==0 || strcmp(temp,b)==0)
-                    continue;
-                if(!is_directory(temp)){
+                if(strcmp(temp,a)==0 || strcmp(temp,b)==0) continue;
+                if(!is_directory(temp))
+                {
                     pthread_create(&(tid[loop]), NULL, count, (void *)temp);
                     loop++;
                 }
