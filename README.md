@@ -2,7 +2,7 @@
 Praktikum mata kuliah Sistem Operasi Informatika ITS 2020 Kelompok F07
 
 - Erlinda Argyanti Nugraha  05111840000017
-- Li'izza Putri Aisyah S.   05111840000073
+- Lii'zza Aisyah Putri Sulistio   05111840000073
 
 ---
 
