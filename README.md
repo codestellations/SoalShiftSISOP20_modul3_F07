@@ -539,7 +539,7 @@ dengan hasilnya nanti akan dimasukkan ke dalam matriks yang merupakan shared mem
 int (*hasil)[5][6];
 ~~~
 
-perkalian matriks dilakukan menggunakan thread `*multip()* sebagai berikut.
+perkalian matriks dilakukan menggunakan thread `*multip()` sebagai berikut.
 ~~~
 void* multip(void* arg){
   int i, j;
