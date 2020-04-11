@@ -554,7 +554,9 @@ while(dot != NULL)
 - `strcpy(copy, arg);` mengopi arg ke string copy
 - `slash = strtok(copy, "/");` digunakan untuk mengambil string dengan delimiter "/"  dan 
   `strcpy(copy, arg);` digunakan untuk mengambil string dengan delimiter "."
-  
+
+Kemudian file dipindahkan ke direktori yang baru dengan nama folder berupa ekstensi dari filenya sesuai dengan perintah input yang dimasukkan dengan penamaan file sama seperti nama dan ekstensi file awal.
+
 ### Perintah "-f"
 Pada perintah "-f" file yang dipindahkan berjumlah sebanyak argumen yang diinputkan.
 <img width="990" alt="Screen Shot 2020-04-11 at 19 17 10" src="https://user-images.githubusercontent.com/58472359/79043909-70237a80-7c2c-11ea-99bb-87aaf1b79ab1.png">
@@ -571,7 +573,7 @@ Pada perintah "-d" file yang dipindahkan merupakan keseluruhan dalam suatu folde
 ### Perintah "*"
 Pada perintah "*" file yang dipindahkan merupakan seluruh file yang berada dalam satu folder dengan program soal3.c 
 yang sedang dijalankan
-<img width="992" alt="Screen Shot 2020-04-10 at 21 55 44" src="https://user-images.githubusercontent.com/58472359/79044140-b4634a80-7c2d-11ea-8638-bbe76917e08d.png">
+<img width="990" alt="Screen Shot 2020-04-11 at 19 20 27" src="https://user-images.githubusercontent.com/58472359/79045609-3b1c2580-7c36-11ea-8ad6-9de0fd200ec6.png">
 <img width="891" alt="Screen Shot 2020-04-11 at 19 48 33" src="https://user-images.githubusercontent.com/58472359/79044144-b75e3b00-7c2d-11ea-9120-9f47624fe2f9.png">
 
 ---
